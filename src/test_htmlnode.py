@@ -1,44 +1,36 @@
 import unittest
 
-from htmlnode import HtmlNode, WrongParametersError
+from htmlnode import HtmlNode, WrongParamsError
 
 
 class TestHtmlNode(unittest.TestCase):
-
-    def wrong_params(self):
-        caught = False
-        try:
-            HtmlNode()
-        except WrongParametersError:
-            caught = True
-        self.assertTrue(caught)
-
+    def test_wrong_params(self):
         caught = False
         try:
             HtmlNode(value="garbage value", children=[HtmlNode(value="garbage value")])
-        except WrongParametersError:
+        except WrongParamsError:
             caught = True
         self.assertTrue(caught)
 
-    def correct_params(self):
+    def test_correct_params(self):
         caught = False
         try:
             HtmlNode(value="garbage value")
-        except WrongParametersError:
+        except WrongParamsError:
             caught = True
         self.assertFalse(caught)
 
         caught = False
         try:
             HtmlNode(children=[HtmlNode(value="garbage value")])
-        except WrongParametersError:
+        except WrongParamsError:
             caught = True
         self.assertFalse(caught)
 
 
-    def props_to_html(self):
+    def test_props_to_html(self):
         node = HtmlNode("p", "some text", props = {"link": "www.example.com", "color": "red", "title": "click me"})
-        self.assertEqual(node.props_to_html(), ' link="www.example.com" color="red" title="click me"')
+        self.assertEqual(node.props_to_html(), ' color="red" link="www.example.com" title="click me"')
 
         node = HtmlNode("p", "some text", props = {"link": "www.example.com"})
         self.assertEqual(node.props_to_html(), ' link="www.example.com"')
