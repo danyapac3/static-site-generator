@@ -1,8 +1,3 @@
-
-from operator import xor
-from types import NotImplementedType
-
-
 class WrongParametersError(Exception):
     'Must be presented one of "children" or "value" params'
 
@@ -36,3 +31,13 @@ class HtmlNode:
 
     def __repr__(self):
         return f"""HtmlNode({self.tag}, {self.value}, {self.children}, {self.props})"""
+
+
+class LeafNode(HtmlNode):
+    def __init__(
+        self,
+        tag: str | None = None,
+        value: str | None = None,
+        props: dict[str, str] | None = None
+    ):
+        super().__init__(tag=tag, value=value, props=props)
