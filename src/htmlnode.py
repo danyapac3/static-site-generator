@@ -1,9 +1,10 @@
 
+from operator import xor
 from types import NotImplementedType
 
 
 class WrongParametersError(Exception):
-    "Both \"value\" and \"children\" parameters aren't passed"
+    'Must be presented one of "children" or "value" params'
 
 class HtmlNode:
     def __init__(
@@ -18,7 +19,7 @@ class HtmlNode:
         self.children = children
         self.props = props
 
-        if (value is None) and (children is None):
+        if (value is None) == (children is None):
             raise WrongParametersError()
 
     def to_html(self):

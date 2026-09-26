@@ -13,6 +13,13 @@ class TestHtmlNode(unittest.TestCase):
             caught = True
         self.assertTrue(caught)
 
+        caught = False
+        try:
+            HtmlNode(value="garbage value", children=[HtmlNode(value="garbage value")])
+        except WrongParametersError:
+            caught = True
+        self.assertTrue(caught)
+
     def correct_params(self):
         caught = False
         try:
@@ -28,13 +35,6 @@ class TestHtmlNode(unittest.TestCase):
             caught = True
         self.assertFalse(caught)
 
-    def no_children_and_value_params(self):
-        caught = False
-        try:
-            HtmlNode(value="some text", children=[HtmlNode(value="garbage value")])
-        except WrongParametersError:
-            caught = True
-        self.assertTrue(caught)
 
     def props_to_html(self):
         node = HtmlNode("p", "some text", props = {"link": "www.example.com", "color": "red", "title": "click me"})
