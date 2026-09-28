@@ -1,7 +1,14 @@
+from this import s
 import unittest
 
-from leafnode import LeafNode
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import (
+    NoClosingDelimiterError,
+    TextNode,
+    TextType,
+    split_node_with_delimiter,
+    split_nodes_delimiter,
+    text_node_to_html_node,
+)
 
 
 class TestTextNode(unittest.TestCase):
@@ -60,6 +67,8 @@ class TestTextNodeToHtmlNode(unittest.TestCase):
         htmlnode = text_node_to_html_node(node)
         self.assertEqual(htmlnode.tag, "img")
         self.assertEqual(htmlnode.value, "")
+        if htmlnode.props is None:
+            self.fail("Somewhat props is not passed correctly")
         self.assertDictEqual(htmlnode.props, {"src": "https://example.com/img.png", "alt": "example image"})
 
     def test_converts_link(self):
@@ -67,7 +76,46 @@ class TestTextNodeToHtmlNode(unittest.TestCase):
         htmlnode = text_node_to_html_node(node)
         self.assertEqual(htmlnode.tag, "a")
         self.assertEqual(htmlnode.value, "this is a link node")
+        if htmlnode.props is None:
+            self.fail("Somewhat props is not passed correctly")
         self.assertDictEqual(htmlnode.props, {"href": "https://example.com"})
+
+
+class TestSplitNodeWithDelimiter(unittest.TestCase):
+    def test_no_delimiter_found(self):
+        node = TextNode("some text", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.TEXT)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0], node)
+
+    def test_empty_string(self):
+        node = TextNode("", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.TEXT)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0].text, "")
+
+    def test_another_text_type(self):
+        node = TextNode("some **hello** text", TextType.BOLD)
+        parts = split_node_with_delimiter(node, "**", TextType.BOLD)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0], node)
+
+    def test_no_closing_delimiter_found(self):
+        node = TextNode("some **hello text", TextType.TEXT)
+        self.assertRaises(NoClosingDelimiterError, split_node_with_delimiter, node, "**", TextType.BOLD)
+
+    def test_two_delimiters(self):
+        node = TextNode("some **hello** text", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.BOLD)
+        self.assertEqual(len(parts), 3)
+        text, bold, text2 = parts
+
+        self.assertIs(text.text_type, TextType.TEXT)
+        self.assertIs(text2.text_type, TextType.TEXT)
+        self.assertIs(bold.text_type, TextType.BOLD)
+        self.assertEqual(text.text, "some ")
+        self.assertEqual(text2.text, " text")
+        self.assertEqual(bold.text, "hello")
 
 if __name__ == "__main__":
     unittest.main()
