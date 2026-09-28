@@ -1,4 +1,3 @@
-from this import s
 import unittest
 
 from textnode import (
@@ -6,7 +5,6 @@ from textnode import (
     TextNode,
     TextType,
     split_node_with_delimiter,
-    split_nodes_delimiter,
     text_node_to_html_node,
 )
 
