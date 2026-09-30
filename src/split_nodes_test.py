@@ -1,6 +1,11 @@
 import unittest
 
-from split_nodes import split_nodes_image, split_nodes_link
+from split_nodes import (
+    NoClosingDelimiterError,
+    split_node_with_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+)
 from textnode import TextNode, TextType
 
 
@@ -87,6 +92,41 @@ class TestSplitNodesLink(unittest.TestCase):
         self.assertEqual(result_nodes[1].text, "some alt")
         self.assertEqual(result_nodes[1].url, "www.imageurl.com")
 
+class TestSplitNodeWithDelimiter(unittest.TestCase):
+    def test_no_delimiter_found(self):
+        node = TextNode("some text", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.TEXT)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0], node)
+
+    def test_empty_string(self):
+        node = TextNode("", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.TEXT)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0].text, "")
+
+    def test_another_text_type(self):
+        node = TextNode("some **hello** text", TextType.BOLD)
+        parts = split_node_with_delimiter(node, "**", TextType.BOLD)
+        self.assertEqual(len(parts), 1)
+        self.assertIs(parts[0], node)
+
+    def test_no_closing_delimiter_found(self):
+        node = TextNode("some **hello text", TextType.TEXT)
+        self.assertRaises(NoClosingDelimiterError, split_node_with_delimiter, node, "**", TextType.BOLD)
+
+    def test_two_delimiters(self):
+        node = TextNode("some **hello** text", TextType.TEXT)
+        parts = split_node_with_delimiter(node, "**", TextType.BOLD)
+        self.assertEqual(len(parts), 3)
+        text, bold, text2 = parts
+
+        self.assertIs(text.text_type, TextType.TEXT)
+        self.assertIs(text2.text_type, TextType.TEXT)
+        self.assertIs(bold.text_type, TextType.BOLD)
+        self.assertEqual(text.text, "some ")
+        self.assertEqual(text2.text, " text")
+        self.assertEqual(bold.text, "hello")
 
 if __name__ == "__main__":
     unittest.main()
