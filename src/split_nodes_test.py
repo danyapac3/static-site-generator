@@ -24,7 +24,7 @@ class TestSplitNodesImage(unittest.TestCase):
         self.assertEqual(node, result_nodes[0])
 
     def test_split_correct_image(self):
-        node = TextNode(f"some{self.CORRECT_IMAGE}some1", TextType.TEXT)
+        node = TextNode("some![some alt](www.imageurl.com)some1", TextType.TEXT)
         result_nodes = split_nodes_image([node])
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
@@ -32,6 +32,8 @@ class TestSplitNodesImage(unittest.TestCase):
         self.assertIs(result_nodes[2].text_type, TextType.TEXT)
         self.assertEqual(result_nodes[0].text, "some")
         self.assertEqual(result_nodes[2].text, "some1")
+        self.assertEqual(result_nodes[1].text, "some alt")
+        self.assertEqual(result_nodes[1].url, "www.imageurl.com")
 
     def test_split_correct_image_but_nothing_before_and_after(self):
         node = TextNode(self.CORRECT_IMAGE, TextType.TEXT)
@@ -42,13 +44,6 @@ class TestSplitNodesImage(unittest.TestCase):
         self.assertIs(result_nodes[2].text_type, TextType.TEXT)
         self.assertEqual(result_nodes[0].text, "")
         self.assertEqual(result_nodes[2].text, "")
-
-    def test_creates_correct_image(self):
-        node = TextNode("![some alt](www.imageurl.com)", TextType.TEXT)
-        result_nodes = split_nodes_image([node])
-        print(result_nodes)
-        self.assertEqual(result_nodes[1].text, "some alt")
-        self.assertEqual(result_nodes[1].url, "www.imageurl.com")
 
 
 class TestSplitNodesLink(unittest.TestCase):
@@ -76,21 +71,17 @@ class TestSplitNodesLink(unittest.TestCase):
         self.assertEqual(result_nodes[2].text, "some1")
 
     def test_split_correct_link_but_nothing_before_and_after(self):
-        node = TextNode(self.CORRECT_LINK, TextType.TEXT)
+        node = TextNode("some[some alt](www.imageurl.com)some1", TextType.TEXT)
         result_nodes = split_nodes_link([node])
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
         self.assertIs(result_nodes[1].text_type, TextType.LINK)
         self.assertIs(result_nodes[2].text_type, TextType.TEXT)
-        self.assertEqual(result_nodes[0].text, "")
-        self.assertEqual(result_nodes[2].text, "")
-
-    def test_creates_correct_link(self):
-        node = TextNode("[some alt](www.imageurl.com)", TextType.TEXT)
-        result_nodes = split_nodes_link([node])
-        print(result_nodes)
+        self.assertEqual(result_nodes[0].text, "some")
+        self.assertEqual(result_nodes[2].text, "some1")
         self.assertEqual(result_nodes[1].text, "some alt")
         self.assertEqual(result_nodes[1].url, "www.imageurl.com")
+
 
 class TestSplitNodeWithDelimiter(unittest.TestCase):
     def test_no_delimiter_found(self):
