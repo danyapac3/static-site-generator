@@ -5,7 +5,7 @@ from textnode import TextNode, TextType
 image_pattern = r"(\!\[.*?\]\(.*?\))"
 link_pattern = r"((?<!!)\[.*?\]\(.*?\))"
 
-def split_node_image(node: TextNode) -> list[TextNode]:
+def extract_image_node(node: TextNode) -> list[TextNode]:
     if node.text_type is not TextType.TEXT:
         return [node]
 
@@ -28,7 +28,7 @@ def split_node_image(node: TextNode) -> list[TextNode]:
     ]
 
 
-def split_node_link(node: TextNode) -> list[TextNode]:
+def extract_link_node(node: TextNode) -> list[TextNode]:
     if node.text_type is not TextType.TEXT:
         return [node]
 
@@ -53,7 +53,7 @@ def split_node_link(node: TextNode) -> list[TextNode]:
 class NoSecondDelimiterError(Exception):
     "There must be 2 delimiters"
 
-def split_node_with_delimiters(node: TextNode, delimiter: str, text_type: TextType) -> list[TextNode]:
+def extract_text_node_with_delimiter(node: TextNode, delimiter: str, text_type: TextType) -> list[TextNode]:
     if node.text_type is not TextType.TEXT:
         return [node]
 

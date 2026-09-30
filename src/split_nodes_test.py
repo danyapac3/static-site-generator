@@ -2,9 +2,9 @@ import unittest
 
 from split_nodes import (
     NoSecondDelimiterError,
-    split_node_image,
-    split_node_link,
-    split_node_with_delimiters,
+    extract_image_node,
+    extract_link_node,
+    extract_text_node_with_delimiter,
 )
 from textnode import TextNode, TextType
 
@@ -13,19 +13,19 @@ class TestSplitNodesImage(unittest.TestCase):
     CORRECT_IMAGE = "![alt text](www.imageurl.com)"
     def test_split_not_text_type(self):
         node = TextNode(self.CORRECT_IMAGE, TextType.BOLD)
-        result_nodes = split_node_image(node)
+        result_nodes = extract_image_node(node)
         self.assertEqual(len(result_nodes), 1)
         self.assertEqual(node, result_nodes[0])
 
     def test_nothing_to_split(self):
         node = TextNode("some", TextType.TEXT)
-        result_nodes = split_node_image(node)
+        result_nodes = extract_image_node(node)
         self.assertEqual(len(result_nodes), 1)
         self.assertEqual(node, result_nodes[0])
 
     def test_split_correct_image(self):
         node = TextNode("some![some alt](www.imageurl.com)some1", TextType.TEXT)
-        result_nodes = split_node_image(node)
+        result_nodes = extract_image_node(node)
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
         self.assertIs(result_nodes[1].text_type, TextType.IMAGE)
@@ -37,7 +37,7 @@ class TestSplitNodesImage(unittest.TestCase):
 
     def test_split_correct_image_but_nothing_before_and_after(self):
         node = TextNode(self.CORRECT_IMAGE, TextType.TEXT)
-        result_nodes = split_node_image(node)
+        result_nodes = extract_image_node(node)
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
         self.assertIs(result_nodes[1].text_type, TextType.IMAGE)
@@ -50,19 +50,19 @@ class TestSplitNodesLink(unittest.TestCase):
     CORRECT_LINK = "[alt text](www.imageurl.com)"
     def test_split_another_from_text_type(self):
         node = TextNode(self.CORRECT_LINK, TextType.BOLD)
-        result_nodes = split_node_link(node)
+        result_nodes = extract_link_node(node)
         self.assertEqual(len(result_nodes), 1)
         self.assertEqual(node, result_nodes[0])
 
     def test_nothing_to_split(self):
         node = TextNode("some", TextType.TEXT)
-        result_nodes = split_node_link(node)
+        result_nodes = extract_link_node(node)
         self.assertEqual(len(result_nodes), 1)
         self.assertEqual(node, result_nodes[0])
 
     def test_split_correct_link(self):
         node = TextNode(f"some{self.CORRECT_LINK}some1", TextType.TEXT)
-        result_nodes = split_node_link(node)
+        result_nodes = extract_link_node(node)
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
         self.assertIs(result_nodes[1].text_type, TextType.LINK)
@@ -72,7 +72,7 @@ class TestSplitNodesLink(unittest.TestCase):
 
     def test_split_correct_link_but_nothing_before_and_after(self):
         node = TextNode("some[some alt](www.imageurl.com)some1", TextType.TEXT)
-        result_nodes = split_node_link(node)
+        result_nodes = extract_link_node(node)
         self.assertEqual(len(result_nodes), 3)
         self.assertIs(result_nodes[0].text_type, TextType.TEXT)
         self.assertIs(result_nodes[1].text_type, TextType.LINK)
@@ -86,25 +86,25 @@ class TestSplitNodesLink(unittest.TestCase):
 class TestSplitNodeWithDelimiter(unittest.TestCase):
     def test_empty_string(self):
         node = TextNode("", TextType.TEXT)
-        parts = split_node_with_delimiters(node, "**", TextType.TEXT)
+        parts = extract_text_node_with_delimiter(node, "**", TextType.TEXT)
         self.assertEqual(len(parts), 1)
         self.assertIs(parts[0].text, "")
 
     def test_extract_from_another_text_type(self):
         node = TextNode("some **hello** text", TextType.BOLD)
-        parts = split_node_with_delimiters(node, "**", TextType.BOLD)
+        parts = extract_text_node_with_delimiter(node, "**", TextType.BOLD)
         self.assertEqual(len(parts), 1)
         self.assertIs(parts[0], node)
 
     def test_no_closing_delimiter_found(self):
         node = TextNode("some **hello text", TextType.TEXT)
-        self.assertRaises(NoSecondDelimiterError ,split_node_with_delimiters, node, "**", TextType.TEXT)
+        self.assertRaises(NoSecondDelimiterError ,extract_text_node_with_delimiter, node, "**", TextType.TEXT)
         node = TextNode("some __hello text", TextType.TEXT)
-        self.assertRaises(NoSecondDelimiterError ,split_node_with_delimiters, node, "__", TextType.TEXT)
+        self.assertRaises(NoSecondDelimiterError ,extract_text_node_with_delimiter, node, "__", TextType.TEXT)
 
     def test_correct_text(self):
         node = TextNode("some **hello** text", TextType.TEXT)
-        parts = split_node_with_delimiters(node, "**", TextType.BOLD)
+        parts = extract_text_node_with_delimiter(node, "**", TextType.BOLD)
         self.assertEqual(len(parts), 3)
         text, bold, text2 = parts
 
