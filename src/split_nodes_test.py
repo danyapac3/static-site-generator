@@ -1,119 +1,227 @@
 import unittest
 
 from split_nodes import (
-    NoSecondDelimiterError,
-    extract_image_node,
-    extract_link_node,
-    extract_text_node_with_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+    split_nodes_delimiters,
 )
 from textnode import TextNode, TextType
 
 
 class TestSplitNodesImage(unittest.TestCase):
-    CORRECT_IMAGE = "![alt text](www.imageurl.com)"
-    def test_split_not_text_type(self):
-        node = TextNode(self.CORRECT_IMAGE, TextType.BOLD)
-        result_nodes = extract_image_node(node)
-        self.assertEqual(len(result_nodes), 1)
-        self.assertEqual(node, result_nodes[0])
+    def test_splits_image(self):
+        node = TextNode("before ![text](www.i.com) after", text_type=TextType.TEXT)
+        parts = split_nodes_image([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before ", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode(" after", text_type=TextType.TEXT),
+            ])
 
-    def test_nothing_to_split(self):
-        node = TextNode("some", TextType.TEXT)
-        result_nodes = extract_image_node(node)
-        self.assertEqual(len(result_nodes), 1)
-        self.assertEqual(node, result_nodes[0])
+        node = TextNode("![alt text](www.imageurl.com)", text_type=TextType.TEXT)
+        parts = split_nodes_image([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("alt text", text_type=TextType.IMAGE, url="www.imageurl.com"),
+            ])
 
-    def test_split_correct_image(self):
-        node = TextNode("some![some alt](www.imageurl.com)some1", TextType.TEXT)
-        result_nodes = extract_image_node(node)
-        self.assertEqual(len(result_nodes), 3)
-        self.assertIs(result_nodes[0].text_type, TextType.TEXT)
-        self.assertIs(result_nodes[1].text_type, TextType.IMAGE)
-        self.assertIs(result_nodes[2].text_type, TextType.TEXT)
-        self.assertEqual(result_nodes[0].text, "some")
-        self.assertEqual(result_nodes[2].text, "some1")
-        self.assertEqual(result_nodes[1].text, "some alt")
-        self.assertEqual(result_nodes[1].url, "www.imageurl.com")
+    def test_splits_three_images(self):
+        node = TextNode("before ![text](www.i.com)![text2](www.i.com) between ![text3](www.i.com)after", text_type=TextType.TEXT)
+        parts = split_nodes_image([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before ", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("text2", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode(" between ", text_type=TextType.TEXT),
+                TextNode("text3", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("after", text_type=TextType.TEXT),
+            ])
+    
+    def test_splits_three_nodes(self):
+        node = TextNode("before![text](www.i.com)between![text1](www.i.com)", text_type=TextType.TEXT)
+        node2 = TextNode("![text3](www.i.com)![text4](www.i.com) between ![text5](www.i.com)", text_type=TextType.TEXT)
+        node3 = TextNode("![text6](www.i.com) after", text_type=TextType.TEXT)
+        parts = split_nodes_image([node, node2, node3])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("between", text_type=TextType.TEXT),
+                TextNode("text1", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("text3", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("text4", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode(" between ", text_type=TextType.TEXT),
+                TextNode("text5", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode("text6", text_type=TextType.IMAGE, url="www.i.com"),
+                TextNode(" after", text_type=TextType.TEXT),
+            ])
+    
+    def test_text_type_is_not_text(self):
+        node = TextNode("![text](www.i.com)", text_type=TextType.BOLD)
+        parts = split_nodes_image([node])
+        self.assertEqual(parts, [node])
 
-    def test_split_correct_image_but_nothing_before_and_after(self):
-        node = TextNode(self.CORRECT_IMAGE, TextType.TEXT)
-        result_nodes = extract_image_node(node)
-        self.assertEqual(len(result_nodes), 3)
-        self.assertIs(result_nodes[0].text_type, TextType.TEXT)
-        self.assertIs(result_nodes[1].text_type, TextType.IMAGE)
-        self.assertIs(result_nodes[2].text_type, TextType.TEXT)
-        self.assertEqual(result_nodes[0].text, "")
-        self.assertEqual(result_nodes[2].text, "")
+
 
 
 class TestSplitNodesLink(unittest.TestCase):
-    CORRECT_LINK = "[alt text](www.imageurl.com)"
-    def test_split_another_from_text_type(self):
-        node = TextNode(self.CORRECT_LINK, TextType.BOLD)
-        result_nodes = extract_link_node(node)
-        self.assertEqual(len(result_nodes), 1)
-        self.assertEqual(node, result_nodes[0])
+    def test_splits_link(self):
+        node = TextNode("before [text](www.i.com) after", text_type=TextType.TEXT)
+        parts = split_nodes_link([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before ", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.LINK, url="www.i.com"),
+                TextNode(" after", text_type=TextType.TEXT),
+            ])
 
-    def test_nothing_to_split(self):
-        node = TextNode("some", TextType.TEXT)
-        result_nodes = extract_link_node(node)
-        self.assertEqual(len(result_nodes), 1)
-        self.assertEqual(node, result_nodes[0])
+        node = TextNode("[text](www.imageurl.com)", text_type=TextType.TEXT)
+        parts = split_nodes_link([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("text", text_type=TextType.LINK, url="www.imageurl.com")
+            ])
 
-    def test_split_correct_link(self):
-        node = TextNode(f"some{self.CORRECT_LINK}some1", TextType.TEXT)
-        result_nodes = extract_link_node(node)
-        self.assertEqual(len(result_nodes), 3)
-        self.assertIs(result_nodes[0].text_type, TextType.TEXT)
-        self.assertIs(result_nodes[1].text_type, TextType.LINK)
-        self.assertIs(result_nodes[2].text_type, TextType.TEXT)
-        self.assertEqual(result_nodes[0].text, "some")
-        self.assertEqual(result_nodes[2].text, "some1")
+    def test_splits_three_links(self):
+        node = TextNode("before [text](www.i.com)[text2](www.i.com) between [text3](www.i.com)after", text_type=TextType.TEXT)
+        parts = split_nodes_link([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before ", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("text2", text_type=TextType.LINK, url="www.i.com"),
+                TextNode(" between ", text_type=TextType.TEXT),
+                TextNode("text3", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("after", text_type=TextType.TEXT),
+            ])
+    
+    def test_splits_three_nodes(self):
+        node = TextNode("before[text](www.i.com)between[text1](www.i.com)", text_type=TextType.TEXT)
+        node2 = TextNode("[text3](www.i.com)[text4](www.i.com) between [text5](www.i.com)", text_type=TextType.TEXT)
+        node3 = TextNode("[text6](www.i.com) after", text_type=TextType.TEXT)
+        parts = split_nodes_link([node, node2, node3])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("before", text_type=TextType.TEXT),
+                TextNode("text", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("between", text_type=TextType.TEXT),
+                TextNode("text1", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("text3", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("text4", text_type=TextType.LINK, url="www.i.com"),
+                TextNode(" between ", text_type=TextType.TEXT),
+                TextNode("text5", text_type=TextType.LINK, url="www.i.com"),
+                TextNode("text6", text_type=TextType.LINK, url="www.i.com"),
+                TextNode(" after", text_type=TextType.TEXT),
+            ])
+    
+    def test_doesnt_extract_images(self):
+        node = TextNode("some![text](www.i.com)some", text_type=TextType.TEXT)
+        parts = split_nodes_link([node])
+        self.assertEqual(
+            parts,
+            [
+                TextNode("some![text](www.i.com)some", text_type=TextType.TEXT),
+            ])
+    
+    def test_text_type_is_not_text(self):
+        node = TextNode("![text](www.i.com)", text_type=TextType.BOLD)
+        parts = split_nodes_image([node])
+        self.assertEqual(parts, [node])
 
-    def test_split_correct_link_but_nothing_before_and_after(self):
-        node = TextNode("some[some alt](www.imageurl.com)some1", TextType.TEXT)
-        result_nodes = extract_link_node(node)
-        self.assertEqual(len(result_nodes), 3)
-        self.assertIs(result_nodes[0].text_type, TextType.TEXT)
-        self.assertIs(result_nodes[1].text_type, TextType.LINK)
-        self.assertIs(result_nodes[2].text_type, TextType.TEXT)
-        self.assertEqual(result_nodes[0].text, "some")
-        self.assertEqual(result_nodes[2].text, "some1")
-        self.assertEqual(result_nodes[1].text, "some alt")
-        self.assertEqual(result_nodes[1].url, "www.imageurl.com")
 
+class TestSplitNodesDelimiters(unittest.TestCase):
+    def test_splits_one_node_with_two_delimiters(self):
+        node = TextNode("before**between**after", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("before", TextType.TEXT),
+            TextNode("between", TextType.BOLD),
+            TextNode("after", TextType.TEXT),
+        ])
+    
+    def test_splits_node_with_nothing_before_and_after(self):
+        node = TextNode("**between**", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("between", TextType.BOLD),
+        ])
+    
+    def test_splits_node_with_several_occurrences(self):
+        node = TextNode("**bold1**between**bold2** **bold3**", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("bold1", TextType.BOLD),
+            TextNode("between", TextType.TEXT),
+            TextNode("bold2", TextType.BOLD),
+            TextNode(" ", TextType.TEXT),
+            TextNode("bold3", TextType.BOLD),
+        ])
+    
+    def test_splits_several_nodes(self):
+        node = TextNode("**bold1**", TextType.TEXT)
+        node1 = TextNode("**bold2**", TextType.TEXT)
+        node2 = TextNode("**bold3**", TextType.TEXT)
+        parts = split_nodes_delimiters([node, node1, node2], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("bold1", TextType.BOLD),
+            TextNode("bold2", TextType.BOLD),
+            TextNode("bold3", TextType.BOLD),
+        ])
+    
+    def test_nothing_happenes_when_no_closing_delimiter_occured(self):
+        node = TextNode("**bold1", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("**bold1", TextType.TEXT),
+        ])
+        
+        node = TextNode("**bold1****bold2", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("bold1", TextType.BOLD),
+            TextNode("**bold2", TextType.TEXT),
+        ])
+    
+    def test_nothing_happenes_when_text_type_is_not_text(self):
+        node = TextNode("**bold1**", TextType.LINK)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [node])
 
-class TestSplitNodeWithDelimiter(unittest.TestCase):
-    def test_empty_string(self):
-        node = TextNode("", TextType.TEXT)
-        parts = extract_text_node_with_delimiter(node, "**", TextType.TEXT)
-        self.assertEqual(len(parts), 1)
-        self.assertIs(parts[0].text, "")
+    def test_works_with_different_delimiters(self):
+        node = TextNode("**bold**", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "**", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("bold", TextType.BOLD),
+        ])
 
-    def test_extract_from_another_text_type(self):
-        node = TextNode("some **hello** text", TextType.BOLD)
-        parts = extract_text_node_with_delimiter(node, "**", TextType.BOLD)
-        self.assertEqual(len(parts), 1)
-        self.assertIs(parts[0], node)
+        node = TextNode("_italic_", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "_", TextType.ITALIC)
+        self.assertEqual(parts, [
+            TextNode("italic", TextType.ITALIC),
+        ])
 
-    def test_no_closing_delimiter_found(self):
-        node = TextNode("some **hello text", TextType.TEXT)
-        self.assertRaises(NoSecondDelimiterError ,extract_text_node_with_delimiter, node, "**", TextType.TEXT)
-        node = TextNode("some __hello text", TextType.TEXT)
-        self.assertRaises(NoSecondDelimiterError ,extract_text_node_with_delimiter, node, "__", TextType.TEXT)
+        node = TextNode("`code`", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "`", TextType.CODE)
+        self.assertEqual(parts, [
+            TextNode("code", TextType.CODE),
+        ])
 
-    def test_correct_text(self):
-        node = TextNode("some **hello** text", TextType.TEXT)
-        parts = extract_text_node_with_delimiter(node, "**", TextType.BOLD)
-        self.assertEqual(len(parts), 3)
-        text, bold, text2 = parts
+        node = TextNode("** **red** **", TextType.TEXT)
+        parts = split_nodes_delimiters([node], "** **", TextType.BOLD)
+        self.assertEqual(parts, [
+            TextNode("red", TextType.BOLD),
+        ])
 
-        self.assertIs(text.text_type, TextType.TEXT)
-        self.assertIs(text2.text_type, TextType.TEXT)
-        self.assertIs(bold.text_type, TextType.BOLD)
-        self.assertEqual(text.text, "some ")
-        self.assertEqual(text2.text, " text")
-        self.assertEqual(bold.text, "hello")
 
 if __name__ == "__main__":
     unittest.main()
