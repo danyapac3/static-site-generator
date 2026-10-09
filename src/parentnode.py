@@ -25,4 +25,4 @@ class ParentNode(HtmlNode):
 
 
     def __repr__(self):
-       return f"LeafNode({self.tag}, {self.value}, {self.props})"
+       return f"ParentNode({self.tag}, {self.children}, {self.props})"

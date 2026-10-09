@@ -1,9 +1,9 @@
 import unittest
 
 from split_nodes import (
+    split_nodes_delimiters,
     split_nodes_image,
     split_nodes_link,
-    split_nodes_delimiters,
 )
 from textnode import TextNode, TextType
 
@@ -41,7 +41,7 @@ class TestSplitNodesImage(unittest.TestCase):
                 TextNode("text3", text_type=TextType.IMAGE, url="www.i.com"),
                 TextNode("after", text_type=TextType.TEXT),
             ])
-    
+
     def test_splits_three_nodes(self):
         node = TextNode("before![text](www.i.com)between![text1](www.i.com)", text_type=TextType.TEXT)
         node2 = TextNode("![text3](www.i.com)![text4](www.i.com) between ![text5](www.i.com)", text_type=TextType.TEXT)
@@ -61,7 +61,7 @@ class TestSplitNodesImage(unittest.TestCase):
                 TextNode("text6", text_type=TextType.IMAGE, url="www.i.com"),
                 TextNode(" after", text_type=TextType.TEXT),
             ])
-    
+
     def test_text_type_is_not_text(self):
         node = TextNode("![text](www.i.com)", text_type=TextType.BOLD)
         parts = split_nodes_image([node])
@@ -103,7 +103,7 @@ class TestSplitNodesLink(unittest.TestCase):
                 TextNode("text3", text_type=TextType.LINK, url="www.i.com"),
                 TextNode("after", text_type=TextType.TEXT),
             ])
-    
+
     def test_splits_three_nodes(self):
         node = TextNode("before[text](www.i.com)between[text1](www.i.com)", text_type=TextType.TEXT)
         node2 = TextNode("[text3](www.i.com)[text4](www.i.com) between [text5](www.i.com)", text_type=TextType.TEXT)
@@ -123,7 +123,7 @@ class TestSplitNodesLink(unittest.TestCase):
                 TextNode("text6", text_type=TextType.LINK, url="www.i.com"),
                 TextNode(" after", text_type=TextType.TEXT),
             ])
-    
+
     def test_doesnt_extract_images(self):
         node = TextNode("some![text](www.i.com)some", text_type=TextType.TEXT)
         parts = split_nodes_link([node])
@@ -132,7 +132,7 @@ class TestSplitNodesLink(unittest.TestCase):
             [
                 TextNode("some![text](www.i.com)some", text_type=TextType.TEXT),
             ])
-    
+
     def test_text_type_is_not_text(self):
         node = TextNode("![text](www.i.com)", text_type=TextType.BOLD)
         parts = split_nodes_image([node])
@@ -148,14 +148,14 @@ class TestSplitNodesDelimiters(unittest.TestCase):
             TextNode("between", TextType.BOLD),
             TextNode("after", TextType.TEXT),
         ])
-    
+
     def test_splits_node_with_nothing_before_and_after(self):
         node = TextNode("**between**", TextType.TEXT)
         parts = split_nodes_delimiters([node], "**", TextType.BOLD)
         self.assertEqual(parts, [
             TextNode("between", TextType.BOLD),
         ])
-    
+
     def test_splits_node_with_several_occurrences(self):
         node = TextNode("**bold1**between**bold2** **bold3**", TextType.TEXT)
         parts = split_nodes_delimiters([node], "**", TextType.BOLD)
@@ -166,7 +166,7 @@ class TestSplitNodesDelimiters(unittest.TestCase):
             TextNode(" ", TextType.TEXT),
             TextNode("bold3", TextType.BOLD),
         ])
-    
+
     def test_splits_several_nodes(self):
         node = TextNode("**bold1**", TextType.TEXT)
         node1 = TextNode("**bold2**", TextType.TEXT)
@@ -177,21 +177,21 @@ class TestSplitNodesDelimiters(unittest.TestCase):
             TextNode("bold2", TextType.BOLD),
             TextNode("bold3", TextType.BOLD),
         ])
-    
+
     def test_nothing_happenes_when_no_closing_delimiter_occured(self):
         node = TextNode("**bold1", TextType.TEXT)
         parts = split_nodes_delimiters([node], "**", TextType.BOLD)
         self.assertEqual(parts, [
             TextNode("**bold1", TextType.TEXT),
         ])
-        
+
         node = TextNode("**bold1****bold2", TextType.TEXT)
         parts = split_nodes_delimiters([node], "**", TextType.BOLD)
         self.assertEqual(parts, [
             TextNode("bold1", TextType.BOLD),
             TextNode("**bold2", TextType.TEXT),
         ])
-    
+
     def test_nothing_happenes_when_text_type_is_not_text(self):
         node = TextNode("**bold1**", TextType.LINK)
         parts = split_nodes_delimiters([node], "**", TextType.BOLD)

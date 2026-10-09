@@ -1,14 +1,16 @@
 import unittest
+
 from text_to_text_nodes import text_to_text_nodes
 from textnode import TextNode, TextType
 
+
 class TestTextToTextNodes(unittest.TestCase):
-    def returns_correct_nodes(self):
+    def test_returns_correct_nodes(self):
         text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
         result = text_to_text_nodes(text)
-        
+
         self.assertEqual(
-            retult,
+            result,
             [
                 TextNode("This is ", TextType.TEXT),
                 TextNode("text", TextType.BOLD),
