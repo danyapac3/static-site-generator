@@ -2,6 +2,7 @@ import unittest
 
 from blocktype import BlockType, block_to_block_type
 
+
 class TestBlockToBlockType(unittest.TestCase):
     def test_heading(self):
         self.assertIs(block_to_block_type("# some hello world"), BlockType.HEADING)
@@ -45,13 +46,13 @@ class TestBlockToBlockType(unittest.TestCase):
     def test_ordered_list(self):
         text = "1. item\n2. item\n3. item"
         self.assertIs(block_to_block_type(text), BlockType.ORDERED_LIST)
-        
+
         text = "2. item\n3. item\n4. item"
         self.assertIs(block_to_block_type(text), BlockType.PARAGRAPH)
-        
+
         text = "1. item\n2.item\n3. item"
         self.assertIs(block_to_block_type(text), BlockType.PARAGRAPH)
-        
+
         text = "1. item\n2 item\n3. item"
         self.assertIs(block_to_block_type(text), BlockType.PARAGRAPH)
 
