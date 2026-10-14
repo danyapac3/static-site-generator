@@ -1,7 +1,7 @@
 import textwrap
 import unittest
 
-from markdown_to_html_node import create_code_block, markdown_to_html_node
+from markdown_to_html_node import markdown_to_html_node
 
 
 class TestMarkdownToHtmlNode(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         ).strip()
 
         node = markdown_to_html_node(markdown)
-        self.assertEqual(node.to_html(), f"<div><pre><code>{markdown}</code></pre></div>")
+        self.assertEqual(node.to_html(), "<div><pre><code># expected output _**i love markdown**_\ns = \"**i love markdown**\")\nprint(f\"_{s}_\")</code></pre></div>")
 
     def test_quote(self):
         markdown = textwrap.dedent(
@@ -65,13 +65,13 @@ class TestMarkdownToHtmlNode(unittest.TestCase):
         markdown = textwrap.dedent(
             """
             > **hello1**
-            >  hello2
-            >   hello3
-            >hello4
+            > hello2
+            > hello3
+            > hello4
             """
         )
         node = markdown_to_html_node(markdown)
-        self.assertEqual(node.to_html(), "<div><pre><blockquote> <b>hello1</b>\n  hello2\n   hello3\nhello4</blockquote></pre></div>")
+        self.assertEqual(node.to_html(), "<div><pre><blockquote><b>hello1</b>\nhello2\nhello3\nhello4</blockquote></pre></div>")
 
     def test_ordered_list(self):
         markdown = textwrap.dedent(

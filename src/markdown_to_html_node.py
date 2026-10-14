@@ -1,8 +1,8 @@
 from blocktype import BlockType, block_to_block_type
 from htmlnode import HtmlNode
+from leafnode import LeafNode
 from markdown_to_blocks import markdown_to_blocks
 from parentnode import ParentNode
-from src.leafnode import LeafNode
 from text_to_text_nodes import text_to_text_nodes
 from textnode import TextNode, TextType, text_node_to_html_node
 
@@ -15,7 +15,9 @@ def create_heading(block: str) -> HtmlNode:
     return result
 
 def create_code_block(block: str) -> HtmlNode:
-    result = ParentNode("pre", [LeafNode("code", value=block)])
+    result = ParentNode("pre", [LeafNode("code",
+        value=block.removeprefix("```").removesuffix("```").strip()
+    )])
     return result
 
 def create_paragraph(block: str) -> HtmlNode:
@@ -25,7 +27,13 @@ def create_paragraph(block: str) -> HtmlNode:
     return result
 
 def create_quote(block: str) -> HtmlNode:
-    lines = [line.removeprefix('>') for line in block.split("\n")]
+    lines = []
+    for line in block.split("\n"):
+        if line.startswith("> "):
+            lines.append(line.removeprefix("> "))
+        else:
+            lines.append(line.removeprefix(">"))
+
     children = []
     for line_index in range(len(lines)):
         line = lines[line_index]
