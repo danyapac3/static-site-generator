@@ -24,7 +24,7 @@ def generate_files(target_path: str):
     for dir in dirs:
         yield from generate_files(dir)
 
-def generate_page(from_path: str, template_path: str, dest_path: str):
+def generate_page(from_path: str, template_path: str, dest_path: str, base_path: str | None = None):
     print(f"Generating page from {from_path} into {dest_path} using template {template_path}.")
 
     markdown = None
@@ -39,6 +39,10 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 
     page = template.replace("{{ Title }}", title).replace("{{ Content }}", content)
 
+    if base_path:
+         page = page.replace('href="/', f'href="{base_path}')
+         page = page.replace('src="/', f'src="{base_path}')
+
     if not os.path.exists(os.path.dirname(dest_path)):
         os.makedirs(os.path.dirname(dest_path))
 
@@ -46,7 +50,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
         f.write(page)
 
 
-def generate_page_recursively(from_path: str, template_path: str, dest_path: str):
+def generate_page_recursively(from_path: str, template_path: str, dest_path: str, base_path: str | None = None):
     for f in generate_files(from_path):
         original_filename = os.path.basename(f)
 
@@ -56,7 +60,7 @@ def generate_page_recursively(from_path: str, template_path: str, dest_path: str
         changed_filename = original_filename.removesuffix(".md") + ".html"
 
         dst_path = os.path.normpath(os.path.join(dest_path, os.path.relpath(os.path.dirname(f), from_path), changed_filename))
-        generate_page(f, template_path, dst_path)
+        generate_page(f, template_path, dst_path, base_path=base_path)
 
 def recursive_copy(src: str, dist: str):
     if not os.path.exists(src):
@@ -74,9 +78,13 @@ def recursive_copy(src: str, dist: str):
         recursive_copy(os.path.join(src, entry), os.path.join(dist, entry))
 
 def main() -> None:
+    base_path = None
+    if len(sys.argv) > 1:
+        base_path = sys.argv[1]
+
     project_root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
     try:
-        recursive_copy(os.path.join(project_root, "static"), os.path.join(project_root, "public"))
+        recursive_copy(os.path.join(project_root, "static"), os.path.join(project_root, "docs"))
     except OSError:
         print("Cannot copy static files into public directory")
         sys.exit(1)
@@ -84,7 +92,8 @@ def main() -> None:
     generate_page_recursively(
         os.path.join(project_root, "content"),
         os.path.join(project_root, "template.html"),
-        os.path.join(project_root, "public"),
+        os.path.join(project_root, "docs"),
+        base_path=base_path
     )
 
 if __name__ == "__main__":

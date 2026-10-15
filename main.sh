@@ -7,4 +7,5 @@ then
     exit 1
 fi
 
-python3 "$main_path"
+echo "${project_root}/docs"
+python3 -m http.server 8888 -d "${project_root}/docs"
