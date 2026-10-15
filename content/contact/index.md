@@ -6,4 +6,4 @@ Give me a call anytime to chat about Tolkien!
 
 `555-555-5555`
 
-**"V‡ya m‡ri‘."**
+**"VÃ¡ya mÃ¡riÃ«."**

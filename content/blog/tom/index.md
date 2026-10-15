@@ -18,7 +18,7 @@ Having traversed the corridors of Tolkien's sprawling world, immersed in its lor
 
 ### A Divergence from Narrative Flow
 
-Tolkien's epic is known for its meticulous pacing and the gravity of its themes. Enter Tom Bombadil Ð a character whose frivolity and detachment from worldly events create a jarring contrast within the otherwise cohesive narrative:
+Tolkien's epic is known for its meticulous pacing and the gravity of its themes. Enter Tom Bombadil â€“ a character whose frivolity and detachment from worldly events create a jarring contrast within the otherwise cohesive narrative:
 
 1. **An Unnecessary Interlude**: The encounter with Tom, while quaint and endearing, serves as a temporal diversion that detracts from the urgency of the Fellowship's quest.
 2. **An Outlier in Purpose**: His escapades, while rich in mirth, add little to the central narrative, raising questions about their relevance in the grand design of Middle-earth.
@@ -50,8 +50,8 @@ Tom Bombadil's inclusion inadvertently shifts focus from the pressing matters of
 
 ## Conclusion
 
-As we ponder the manifold wonders and intricacies of Tolkien's world, it is evident that Tom Bombadil, while delightfully unique, was a narrative anomaly Ð a whimsical reflection in the mirror of Middle-earth's grand narrative. While his character captivates with a certain mystique, it answers questions that were never asked, leaving readers with more enigmas than revelations.
+As we ponder the manifold wonders and intricacies of Tolkien's world, it is evident that Tom Bombadil, while delightfully unique, was a narrative anomaly â€“ a whimsical reflection in the mirror of Middle-earth's grand narrative. While his character captivates with a certain mystique, it answers questions that were never asked, leaving readers with more enigmas than revelations.
 
-In conclusion, as one who has explored the mythic past of Middle-earth and sought coherence in its storied legacy, I propose that Tom Bombadil, for all his merriment and enigma, was a divergence from the tale's destined path Ð a curiosity that, while endearing to some, stands as a reminder that even in the most meticulously crafted worlds, not all paths lead to the fulfillment of the quest.
+In conclusion, as one who has explored the mythic past of Middle-earth and sought coherence in its storied legacy, I propose that Tom Bombadil, for all his merriment and enigma, was a divergence from the tale's destined path â€“ a curiosity that, while endearing to some, stands as a reminder that even in the most meticulously crafted worlds, not all paths lead to the fulfillment of the quest.
 
 Thus, let us bid farewell to Old Tom with a final song, recognizing both his charm and the discord his presence sowed. For within the hallowed pages of Tolkien's masterpiece, every beat must resonate with purpose, lest the harmony of the tale be lost to idle whimsy.
